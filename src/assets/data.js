@@ -1,4 +1,5 @@
-[   {
+export const data = [
+    {
         "id": 1,
         "option": "Una pàgina web",
         "price": 500
