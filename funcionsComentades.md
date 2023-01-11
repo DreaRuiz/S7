@@ -1,84 +1,7 @@
-# Exercici 1 OPCIÓ A
+# Exercici 1
 
 ### App
 
-```jsx
-import { useState } from "react";
-import { data } from "./assets/data";
-
-// Creo el format pel preu.
-const getFormattedPrice = (price) => `${price}€ `;
-
-export default function App() {
-  // PREU TOTAL
-  // Poso l'estat del TOTAL a 0 (perquè pugui anar sumant els preus).
-  const [total, setTotal] = useState(0);
-
-  // CHECKBOX
-  // POSAR EN FALSE: Creo un nou array amb tots els elements en state FALS (.fill posa totes les caselles en fals).
-  const [checkedState, setCheckedState] = useState(
-    new Array(data.length).fill(false)
-  );
-
-  // MARCAR LA CASELLA (DE FALSE A TRUE): Amb la funció handleOnChange: Recorro l’array chekedState amb un map i miro si la position que li ve per paràmetre és igual a index(de l'ítem del map). Si és així, es modifica el valor (de true a false i de false a true). Es modifica el checkedState amb el setCheckedState passant-li la updatedCheckedState
-  const handleOnChange = (position) => {
-    const updatedCheckedState = checkedState.map((item, index) =>
-      index === position ? !item : item
-    );
-
-    setCheckedState(updatedCheckedState);
-
-    // IDENTIFICAR QUINA CASELLA/ITEM S'HA MARCAT I SUMAR EL PREU: Faig un reduce de updateCheckedState per trobar els preus que he de sumar. Si el currentState és true, afegirà el preu a la suma al total que ja tingui sumat (sigui 0 o el preu dels productes ja triats). Tot això es guarda a totalPrice (que canvia l'estat de total amb la funció setTotal).
-    const totalPrice = updatedCheckedState.reduce(
-      (sum, currentState, index) => {
-        if (currentState === true) {
-          return sum + data[index].price;
-        }
-        return sum;
-      },
-      0
-    );
-
-    setTotal(totalPrice);
-  };
-
-  return (
-    <div>
-      <h3>¿Qué quieres hacer?</h3>
-      <div>
-        {data.map(({ option, price }, index) => {
-          // Amb un map de data extraiem la option i el preu de data. I també li passem per props l'index.
-          // CONSTRUCCIÓ DE LA "FRSE": Construïm la label amb l'index corresponent, la option i el price en el format definit abans.
-          return (
-            <div key={index}>
-              <div>
-                <input
-                  type="checkbox"
-                  id={index}
-                  name={option}
-                  value={option}
-                  checked={checkedState[index]}
-                  onChange={() => handleOnChange(index)}
-                />
-                <label>
-                  {option} {getFormattedPrice(price)}
-                </label>
-              </div>
-            </div>
-          );
-        })}
-        <div> Total: {getFormattedPrice(total)}</div>
-      </div>
-    </div>
-  );
-}
-
-```
-
-
-# Exercici 1 OPCIÓ B
-
-### App
 ```jsx
 import { useState } from "react";
 import { data } from "./assets/data";
@@ -142,6 +65,7 @@ export default function App() {
 ```
 
 ### Checkbox
+
 ```jsx
 import React from "react";
 
@@ -175,5 +99,144 @@ export function Checkbox({
     </div>
   );
 }
+```
 
+# EXERCICI 2
+
+### App
+
+```jsx
+import { useEffect, useState } from "react";
+import { data } from "./assets/data";
+import { Checkbox } from "./components/Checkbox";
+import { FormWeb } from "./components/FormWeb";
+
+const getFormattedPrice = (price) => `${price}€ `;
+
+export default function App() {
+  // ESTATS
+  const [total, setTotal] = useState(0);
+  const [numPages, setNumPages] = useState(1);
+  const [numLanguages, setNumLanguages] = useState(1);
+  const [checkboxPrice, setCheckboxPrice] = useState(0);
+
+  // ESTAT DESSELECCIONAT DE TOTS ELS ELEMENTS DE L'ARRAY
+  const [checkedState, setCheckedState] = useState(
+    new Array(data.length).fill(false)
+  );
+
+  // EFFECTS (Quan canvia l'estat de que està entre [] es crida a la funció)
+  useEffect(() => {
+    calculateTotalPrice();
+  }, [checkedState, numLanguages, numPages]);
+
+  // SELECCIONA I DESSELECCIONA CHECKBOX
+  function onCheckboxSelected(i) {
+    let nextCheckedState = [...checkedState];
+    nextCheckedState[i] = !nextCheckedState[i];
+    // CANVIA L'ESTAT DE LA CHECKBOX
+    setCheckedState(nextCheckedState);
+
+    // SUMA EL PREU DELS PRODUCTES SELECCIONATS
+    const sumPrice = nextCheckedState.reduce((acc, currentValue, index) => {
+      if (currentValue === true) {
+        return acc + data[index].price;
+      }
+      return acc;
+    }, 0);
+    setCheckboxPrice(sumPrice);
+  }
+  // CANVIA L'ESTAT DEL NUM DE PÀGINES
+  function handlePagesChange(e) {
+    setNumPages(e.target.value);
+  }
+  // CANVIA L'ESTAT DEL NUM D'IDIOMES
+  function handleLanguagesChange(e) {
+    setNumLanguages(e.target.value);
+  }
+
+  // CALCULA EL PREU DE LA WEB AMB DIF. PÀGINES I DIF. IDIOMES
+  // CALCULA EL PREU TOTAL (PÀGINES + CHECKBOX) I CANVIA L'ESTAT
+  function calculateTotalPrice() {
+    const totalWeb = numPages * numLanguages * 30;
+    const total = totalWeb + checkboxPrice;
+
+    setTotal(total);
+  }
+
+  return (
+    <div>
+      <h3> Què vols fer? </h3>
+      <div>
+        {data.map(({ option, price }, index) => {
+          return (
+            <>
+              <Checkbox
+                index={index}
+                text={option}
+                price={price}
+                key={index}
+                onCheck={onCheckboxSelected}
+                getFormattedPrice={getFormattedPrice}
+              />
+              {checkedState[0] &&
+                index === 0 && ( // MOSTRA EL FORMULARI AL MARCAR LA PRIMERA CHECKBOX (checkedState[] vol dir si l'index 0 està check i index: darrera de quin vull que m'ho mostri).
+                  <FormWeb
+                    numPages={numPages}
+                    numLanguages={numLanguages}
+                    handlePagesChange={handlePagesChange}
+                    handleLanguagesChange={handleLanguagesChange}
+                  />
+                )}
+            </>
+          );
+        })}
+        <p> Preu total: {getFormattedPrice(total)} </p>
+      </div>
+    </div>
+  );
+}
+```
+
+### FormWeb
+
+```jsx
+import React from "react";
+import { Form } from "../styled";
+
+export function FormWeb({
+  numPages,
+  handlePagesChange,
+  numLanguages,
+  handleLanguagesChange,
+}) {
+  return (
+    // Form ve de l'styled i és qui dona forma al border.
+    <>
+      <Form>
+        <label>
+          Número de pàgines:
+          <input
+            name="numPages"
+            type="number"
+            value={numPages} // El value és l'estat (numPages).
+            onChange={handlePagesChange} // Quan canvia crida a la funció handlePagesChange.
+          />
+        </label>
+
+        <br />
+
+        <label>
+          Número d'idiomes:
+          <input
+            name="numLanguages"
+            type="number"
+            value={numLanguages}
+            onChange={handleLanguagesChange}
+          />
+        </label>
+      </Form>
+    </>
+  );
+}
 ```
