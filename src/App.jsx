@@ -26,6 +26,12 @@ export default function App() {
   function onCheckboxSelected(i) {
     let nextCheckedState = [...checkedState];
     nextCheckedState[i] = !nextCheckedState[i];
+
+    // CANVIA L'ESTAT DE LES PÀGINES I ELS IDIOMES A 0 QUAN ES DESSELECCIONA LA CHECKBOX DE WEB
+    if (nextCheckedState[0] === false) {
+      setNumLanguages(0);
+      setNumPages(0);
+    }
     // CANVIA L'ESTAT DE LA CHECKBOX
     setCheckedState(nextCheckedState);
 
@@ -39,14 +45,6 @@ export default function App() {
 
     // CANVIA L'ESTAT DE CHECKBOXPRICE
     setCheckboxPrice(sumPrice);
-  }
-  // CANVIA L'ESTAT DEL NUM DE PÀGINES
-  function handlePagesChange(e) {
-    setNumPages(e.target.value);
-  }
-  // CANVIA L'ESTAT DEL NUM D'IDIOMES
-  function handleLanguagesChange(e) {
-    setNumLanguages(e.target.value);
   }
 
   // CALCULA EL PREU DE LA WEB AMB DIF. PÀGINES I DIF. IDIOMES
@@ -78,8 +76,8 @@ export default function App() {
                   <FormWeb
                     numPages={numPages}
                     numLanguages={numLanguages}
-                    handlePagesChange={handlePagesChange}
-                    handleLanguagesChange={handleLanguagesChange}
+                    setNumPages={setNumPages}
+                    setNumLanguages={setNumLanguages}
                   />
                 )}
             </>

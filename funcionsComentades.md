@@ -240,3 +240,178 @@ export function FormWeb({
   );
 }
 ```
+# EXERCICI 3
+
+### App
+```jsx
+import { useEffect, useState } from "react";
+import { data } from "./assets/data";
+import { Checkbox } from "./components/Checkbox";
+import { FormWeb } from "./components/FormWeb";
+
+const getFormattedPrice = (price) => `${price}€ `;
+
+export default function App() {
+  // ESTATS
+  const [total, setTotal] = useState(0);
+  const [checkboxPrice, setCheckboxPrice] = useState(0);
+  const [numPages, setNumPages] = useState(1);
+  const [numLanguages, setNumLanguages] = useState(1);
+
+  // ESTAT DESSELECCIONAT DE TOTS ELS ELEMENTS DE L'ARRAY
+  const [checkedState, setCheckedState] = useState(
+    new Array(data.length).fill(false)
+  );
+
+  // EFFECTS
+  useEffect(() => {
+    calculateTotalPrice();
+  }, [checkedState, numLanguages, numPages]);
+
+  // SELECCIONA I DESSELECCIONA CHECKBOX
+  function onCheckboxSelected(i) {
+    let nextCheckedState = [...checkedState];
+    nextCheckedState[i] = !nextCheckedState[i];
+
+    // CANVIA L'ESTAT DE LES PÀGINES I ELS IDIOMES A 0 QUAN ES DESSELECCIONA LA CHECKBOX DE WEB
+    if (nextCheckedState[0] === false) { // Comp.ova que la primera casella (la de la web) està desmarcada-
+      setNumLanguages(0); // Canvia l'estat del numPages a 0 perquè no ho sumi al preu.
+      setNumPages(0);
+    }
+    // CANVIA L'ESTAT DE LA CHECKBOX
+    setCheckedState(nextCheckedState);
+
+    // SUMA EL PREU DELS PRODUCTES SELECCIONATS
+    const sumPrice = nextCheckedState.reduce((acc, currentValue, index) => {
+      if (currentValue === true) {
+        return acc + data[index].price;
+      }
+      return acc;
+    }, 0);
+
+    // CANVIA L'ESTAT DE CHECKBOXPRICE
+    setCheckboxPrice(sumPrice);
+  }
+
+  // CALCULA EL PREU DE LA WEB AMB DIF. PÀGINES I DIF. IDIOMES
+  // CALCULA EL PREU TOTAL (PÀGINES + CHECKBOX) I CANVIA L'ESTAT
+  function calculateTotalPrice() {
+    const totalWeb = numPages * numLanguages * 30;
+    const total = totalWeb + checkboxPrice;
+
+    setTotal(total);
+  }
+
+  return (
+    <div>
+      <h3> Què vols fer? </h3>
+      <div>
+        {data.map(({ option, price }, index) => {
+          return (
+            <>
+              <Checkbox
+                index={index}
+                text={option}
+                price={price}
+                key={index}
+                onCheck={onCheckboxSelected}
+                getFormattedPrice={getFormattedPrice}
+              />
+              {checkedState[0] &&
+                index === 0 && ( // MOSTRA EL FORMULARI AL MARCAR LA PRIMERA CHECKBOX
+                  <FormWeb
+                    numPages={numPages}
+                    numLanguages={numLanguages}
+                    setNumPages={setNumPages}
+                    setNumLanguages={setNumLanguages}
+                  />
+                )}
+            </>
+          );
+        })}
+        <p> Preu total: {getFormattedPrice(total)} </p>
+      </div>
+    </div>
+  );
+}
+```
+### FormWeb
+```jsx
+import React from "react";
+import { Form, Button } from "../styled";
+/* import { setNumPages } from '../App' */
+
+export function FormWeb({
+  numPages,
+  setNumPages,
+  handlePagesChange,
+
+  numLanguages,
+  setNumLanguages,
+  handleLanguagesChange,
+}) {
+//PÀGINES
+  //Suma pàgina
+  const increasePag = () => {
+    setNumPages((count) => count + 1);
+  };
+
+  //Resta pàgina
+  const decreasePag = () => {
+    setNumPages((count) => count - 1);
+  };
+
+  // Canvia l'estat de la pàgina
+  function handlePagesChange(e) {
+    setNumPages(e.target.value);
+  }
+
+  //SUMA IDIOMA
+  const increaseLanguages = () => {
+    setNumLanguages((count) => count + 1);
+  };
+
+  //RESTA RESTA IDIOMA
+  const decreaseLanguages = () => {
+    setNumLanguages((count) => count - 1);
+  };
+
+  // CANVIA L'ESTAT DEL NUM D'IDIOMES
+  function handleLanguagesChange(e) {
+    setNumLanguages(e.target.value);
+  }
+
+  return (
+    <>
+      <Form>
+        <div>
+          Número de pàgines:
+          <Button onClick={increasePag}>+</Button>
+          <input
+            name="numPages"
+            type="number"
+            value={numPages}
+            onChange={handlePagesChange}
+          />
+          <Button onClick={decreasePag}>-</Button>
+        </div>
+
+        <br />
+
+        <div>
+          Número d'idiomes:
+          <Button onClick={increaseLanguages}>+</Button>
+          <input
+            name="numLanguages"
+            type="number"
+            value={numLanguages}
+            onChange={handleLanguagesChange}
+          />
+          <Button onClick={decreaseLanguages}>-</Button>
+        </div>
+      </Form>
+    </>
+  );
+}
+
+```
