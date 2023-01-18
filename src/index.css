@@ -17,7 +17,7 @@
 
 a {
   font-weight: 500;
-  color: #646cff;
+  color: #86C8BC;
   text-decoration: inherit;
 }
 a:hover {
@@ -30,11 +30,22 @@ body {
   margin-left: 50px;
   min-width: 320px;
   min-height: 100vh;
+/*   align-items: center; */
+  justify-content: center;
+  display: flex;
+
 }
 
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
+  color: #86C8BC 
+}
+h2 {
+  color: #86C8BC 
+}
+h3 {
+  color: #86C8BC 
 }
 
 button {

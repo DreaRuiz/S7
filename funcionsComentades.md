@@ -240,9 +240,11 @@ export function FormWeb({
   );
 }
 ```
+
 # EXERCICI 3
 
 ### App
+
 ```jsx
 import { useEffect, useState } from "react";
 import { data } from "./assets/data";
@@ -274,7 +276,8 @@ export default function App() {
     nextCheckedState[i] = !nextCheckedState[i];
 
     // CANVIA L'ESTAT DE LES PÀGINES I ELS IDIOMES A 0 QUAN ES DESSELECCIONA LA CHECKBOX DE WEB
-    if (nextCheckedState[0] === false) { // Comp.ova que la primera casella (la de la web) està desmarcada-
+    if (nextCheckedState[0] === false) {
+      // Comp.ova que la primera casella (la de la web) està desmarcada-
       setNumLanguages(0); // Canvia l'estat del numPages a 0 perquè no ho sumi al preu.
       setNumPages(0);
     }
@@ -335,7 +338,9 @@ export default function App() {
   );
 }
 ```
+
 ### FormWeb
+
 ```jsx
 import React from "react";
 import { Form, Button } from "../styled";
@@ -350,7 +355,7 @@ export function FormWeb({
   setNumLanguages,
   handleLanguagesChange,
 }) {
-//PÀGINES
+  //PÀGINES
   //Suma pàgina
   const increasePag = () => {
     setNumPages((count) => count + 1);
@@ -413,5 +418,177 @@ export function FormWeb({
     </>
   );
 }
+```
 
+# EXERCICI 4
+
+### Budget (antiga App)
+
+```jsx
+import { useEffect, useState } from "react";
+import { data } from "../assets/data";
+import { Checkbox } from "../components/Checkbox";
+import { FormWeb } from "../components/FormWeb";
+import { manageLocalStorage } from "../useLocalStorage"; // Importo la funció per fer el LOCALSTORAGE
+
+const getFormattedPrice = (price) => `${price}€ `;
+
+export default function Budget() {
+  // ESTATS
+  const [total, setTotal] = useState(0);
+  const [checkboxPrice, setCheckboxPrice] = useState(0);
+  const [numPages, setNumPages] = useState(0);
+  const [numLanguages, setNumLanguages] = useState(0);
+
+  // ESTAT DESSELECCIONAT DE TOTS ELS ELEMENTS DE L'ARRAY
+  const [checkedState, setCheckedState] = useState(
+    new Array(data.length).fill(false)
+  );
+
+  // RECUPERAR L'ESTAT (LOCALSTORAGE)
+  // Crido a la funció del localStorage, `manageLocalStorage` i li passo la key, la variable de l'estat i la funció per canviar l'estat (que he creat abans al fer el useState).
+  manageLocalStorage("total", total, setTotal);
+  manageLocalStorage("checkboxPrice", checkboxPrice, setCheckboxPrice);
+  manageLocalStorage("numPages", numPages, setNumPages);
+  manageLocalStorage("numLanguages", numLanguages, setNumLanguages);
+  manageLocalStorage("checkedState", checkedState, setCheckedState);
+
+  // EFFECTS
+  useEffect(() => {
+    calculateTotalPrice();
+  }, [checkedState, numLanguages, numPages]);
+
+  // SELECCIONA I DESSELECCIONA CHECKBOX
+  function onCheckboxSelected(i) {
+    let nextCheckedState = [...checkedState];
+    nextCheckedState[i] = !nextCheckedState[i];
+
+    // CANVIA L'ESTAT DE LES PÀGINES I ELS IDIOMES
+    // Si el primer checkbox (el de la web) està marcat, ha de posar les pàgines i els idiomes a 1 (perquè es puguin multiplicar entre si i després per 30 (Si està a 0 qualsevol cosa que multipliqui donarà 0 i no es podrà fer el preu total)).
+    if (nextCheckedState[0] === true) {
+      setNumLanguages(1);
+      setNumPages(1);
+    }
+
+    if (nextCheckedState[0] === false) {
+      setNumLanguages(0);
+      setNumPages(0);
+    }
+    // CANVIA L'ESTAT DE LA CHECKBOX
+    setCheckedState(nextCheckedState);
+
+    // SUMA EL PREU DELS PRODUCTES SELECCIONATS
+    const sumPrice = nextCheckedState.reduce((acc, currentValue, index) => {
+      if (currentValue === true) {
+        return acc + data[index].price;
+      }
+      return acc;
+    }, 0);
+
+    // CANVIA L'ESTAT DE CHECKBOXPRICE
+    setCheckboxPrice(sumPrice);
+  }
+
+  // CALCULA EL PREU DE LA WEB AMB DIF. PÀGINES I DIF. IDIOMES
+  // CALCULA EL PREU TOTAL (PÀGINES + CHECKBOX) I CANVIA L'ESTAT
+  function calculateTotalPrice() {
+    const totalWeb = numPages * numLanguages * 30;
+    const total = totalWeb + checkboxPrice;
+
+    setTotal(total);
+  }
+
+  return (
+    <div>
+      <h1>Què vols fer?</h1>
+      <div>
+        {data.map(({ option, price }, index) => {
+          return (
+            <>
+              <Checkbox
+                index={index}
+                text={option}
+                price={price}
+                key={index}
+                checked={checkedState[index]} // Quan estigui seleccionat, mostra l'estat (seleccionat) de la checkbox per la qual estigui passant el map (això ho faig amb l'index).
+                onCheck={onCheckboxSelected}
+                getFormattedPrice={getFormattedPrice}
+              />
+              {checkedState[0] &&
+                index === 0 && ( // MOSTRA EL FORMULARI AL MARCAR LA PRIMERA CHECKBOX
+                  <FormWeb
+                    numPages={numPages}
+                    numLanguages={numLanguages}
+                    setNumPages={setNumPages}
+                    setNumLanguages={setNumLanguages}
+                  />
+                )}
+            </>
+          );
+        })}
+        <p>
+          <b>Preu total: {getFormattedPrice(total)}</b>
+        </p>
+      </div>
+    </div>
+  );
+}
+```
+
+### useLocalStorage (la funció per guardar i recuperar l'estat de les coses)
+
+```js
+import { useEffect } from "react"; // Importo el useEffect
+// A la funció i passo una key, un estat i una funció per canviar l'estat.
+export const manageLocalStorage = (key, state, setState) => {
+  // RECUPERAR LA INFO DEL LOCALSTORAGE (Al obrir la pàgina)
+  useEffect(() => {
+    // A restoredState es guarda: El que porta (segons la KEY que li passem) el GETITEM des del LOCALSTORAGE.
+    const restoredState = localStorage.getItem(key);
+    // Si hi ha algo dins de RESTOREDSTATE, ho guarda dins de l'STATE amb el setState. I per guardar-ho ho ha de convertir en no-string (amb el JSON.PARSE)
+    if (restoredState) {
+      setState(JSON.parse(restoredState));
+    }
+  }, []); // Els [] es posen per dir que s'ha d'activar quan s'obri la pàgina.
+
+  // GUARDAR LA INFO AL LOCALSTORAGE (Mentre està en funcionament)
+  useEffect(
+    //Segons la KEY, agafa l'estat (que li ve per PROPS) i el convertex en string per guardar-ho al JSON.
+    () => localStorage.setItem(key, JSON.stringify(state)),
+    [state] // Quan canvi l'STATE fes que passi el que hi ha a dins del useEffect
+  );
+};
+```
+
+### Checkbox
+
+```jsx
+import React from "react";
+
+export function Checkbox({
+  index,
+  text,
+  price,
+  onCheck,
+  checked,
+  getFormattedPrice,
+}) {
+  return (
+    <div key={index}>
+      <div>
+        <input
+          type="checkbox"
+          id={index}
+          name={text}
+          value={text}
+          checked={checked} // Li dic que quan estigui marcat (checked), cridi a l'element checked (definit a Budget)
+          onChange={() => onCheck(index)}
+        />
+        <label>
+          {text} {getFormattedPrice(price)}
+        </label>
+      </div>
+    </div>
+  );
+}
 ```

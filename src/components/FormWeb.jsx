@@ -5,13 +5,11 @@ import { Form, Button } from "../styled";
 export function FormWeb({
   numPages,
   setNumPages,
-  handlePagesChange,
 
   numLanguages,
   setNumLanguages,
-  handleLanguagesChange,
 }) {
-//PÀGINES
+  //PÀGINES
   //Suma pàgina
   const increasePag = () => {
     setNumPages((count) => count + 1);
@@ -22,11 +20,11 @@ export function FormWeb({
     setNumPages((count) => count - 1);
   };
 
-  // Canvia l'estat de la pàgina
+  /*   // Canvia l'estat de la pàgina
   function handlePagesChange(e) {
     setNumPages(e.target.value);
   }
-
+ */
   //SUMA IDIOMA
   const increaseLanguages = () => {
     setNumLanguages((count) => count + 1);
@@ -37,23 +35,13 @@ export function FormWeb({
     setNumLanguages((count) => count - 1);
   };
 
-  // CANVIA L'ESTAT DEL NUM D'IDIOMES
-  function handleLanguagesChange(e) {
-    setNumLanguages(e.target.value);
-  }
-
   return (
     <>
       <Form>
         <div>
           Número de pàgines:
           <Button onClick={increasePag}>+</Button>
-          <input
-            name="numPages"
-            type="number"
-            value={numPages}
-            onChange={handlePagesChange}
-          />
+          <input name="numPages" type="number" value={numPages} />
           <Button onClick={decreasePag}>-</Button>
         </div>
 
@@ -65,8 +53,8 @@ export function FormWeb({
           <input
             name="numLanguages"
             type="number"
+            min="0"
             value={numLanguages}
-            onChange={handleLanguagesChange}
           />
           <Button onClick={decreaseLanguages}>-</Button>
         </div>

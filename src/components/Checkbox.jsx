@@ -5,7 +5,7 @@ export function Checkbox({
   text,
   price,
   onCheck,
-  checkedState,
+  checked,
   getFormattedPrice,
 }) {
   return (
@@ -16,7 +16,7 @@ export function Checkbox({
           id={index}
           name={text}
           value={text}
-          checked={checkedState}
+          checked={checked}
           onChange={() => onCheck(index)}
         />
         <label>
