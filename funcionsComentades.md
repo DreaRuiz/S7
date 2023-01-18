@@ -592,3 +592,69 @@ export function Checkbox({
   );
 }
 ```
+# EXERCICI 5
+
+### App
+```jsx
+import React from "react";
+import Routes from "./application/routes";
+
+export const App = () => <Routes />; // Ha d'anar a buscar les pàgines a ROUTES
+
+export default App;
+```
+
+### Routes
+```jsx
+import { BrowserRouter, Route, Routes } from "react-router-dom"; // S'ha d'instal·lar react-router
+import Welcome from "../pages/Welcome"; // Importo la pàgina de Welcome
+import Budget from "../pages/Budget"; // Importo la pàgina de Budget
+
+const Router = () => (
+  <BrowserRouter>
+    <Routes>
+      <Route index element={<Welcome />} /> {// La primera ruta és mostrar el "component" o pàgina WELCOME}
+      <Route path="/Budget/" element={<Budget />} /> {// La segona ruta és anar (a través del botó) al "component" o pàgina BUDGET.}
+    </Routes>
+  </BrowserRouter>
+);
+
+export default Router;
+
+```
+### Budget (queda igual que a l'exercici anterior)
+### Welcome
+```jsx
+import React from "react";
+import { Link } from "react-router-dom"; // Importo el LINK de react-router
+import { ButtonStart } from "../styled"; // Importo l'estil del botó de styled
+
+function Welcome() {
+  return (
+    <main>
+      <h1>Pressupost</h1>
+      <h2>Personalitza el teu servei</h2>
+      <p>
+        A continuació trobaràs una aplicació per calcular el pressupost de
+        diferents serveis.
+      
+        <br />
+        Pots triar entre les diferents opcions i el <b>preu s'actualitzarà
+        automaticament</b> al afegir o treure serveis.
+       
+        <br />
+        Podràs <b>guardar els pressupostos</b> que hagis creat i <b>visualitzar-los</b> a la
+        part dreta de la pantalla. <br/> On també tindràs diferents <b>opcions de
+        filtrat</b>.
+      </p>
+      <p><b>Crea el teu pressupost</b></p>
+      
+      <ul>
+        <ButtonStart>
+          <Link to="/Budget">Crea el teu pressupost</Link> {//Quan clicki al botó ha d'anar a la pàgina BUDGET}
+        </ButtonStart>
+      </ul>
+    </main>
+  );
+}
+```

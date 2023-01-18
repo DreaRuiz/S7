@@ -1,5 +1,5 @@
 import React from "react";
-import { Form, Button } from "../styled";
+import { Form, Button } from "../style/styled";
 /* import { setNumPages } from '../App' */
 
 export function FormWeb({

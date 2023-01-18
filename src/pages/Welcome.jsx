@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { ButtonStart } from "../styled";
+import { ButtonStart } from "../style/styled";
 
 function Welcome() {
   return (
