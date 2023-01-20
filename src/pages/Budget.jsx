@@ -25,8 +25,6 @@ export default function Budget() {
   manageLocalStorage("numLanguages", numLanguages, setNumLanguages);
   manageLocalStorage("checkedState", checkedState, setCheckedState);
 
-  console.log("checkedState", checkedState);
-  console.log("pages", numPages);
   // EFFECTS
   useEffect(() => {
     calculateTotalPrice();
@@ -67,7 +65,6 @@ export default function Budget() {
   function calculateTotalPrice() {
     const totalWeb = numPages * numLanguages * 30;
     const total = totalWeb + checkboxPrice;
-
     setTotal(total);
   }
 
@@ -94,6 +91,7 @@ export default function Budget() {
                     numLanguages={numLanguages}
                     setNumPages={setNumPages}
                     setNumLanguages={setNumLanguages}
+                    key={index}
                   />
                 )}
             </>

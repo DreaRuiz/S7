@@ -1,6 +1,7 @@
 import React from "react";
-import { Form, Button } from "../style/styled";
-/* import { setNumPages } from '../App' */
+import { Form, Button, ButtonInfo } from "../style/styled";
+import Swal from "sweetalert2";
+/* import "../index.css"; */
 
 export function FormWeb({
   numPages,
@@ -20,11 +21,6 @@ export function FormWeb({
     setNumPages((count) => count - 1);
   };
 
-  /*   // Canvia l'estat de la pàgina
-  function handlePagesChange(e) {
-    setNumPages(e.target.value);
-  }
- */
   //SUMA IDIOMA
   const increaseLanguages = () => {
     setNumLanguages((count) => count + 1);
@@ -35,6 +31,29 @@ export function FormWeb({
     setNumLanguages((count) => count - 1);
   };
 
+  // POPUP
+  const ExtraInfoPages = () => {
+    Swal.fire({
+      text: "Aquest component indica el número de planes que tindrà la teva pàgina web",
+      showConfirmButton: false,
+      showCloseButton: false,
+      customClass: {
+        popup: "coustomPopup",
+      },
+    });
+  };
+
+  const ExtraInfoLanguages = () => {
+    Swal.fire({
+      text: "Aquest component indica el número d'idiomes que tindrà la teva pàgina web",
+      showConfirmButton: false,
+      showCloseButton: false,
+      customClass: {
+        popup: "coustomContainerPopup",
+      },
+    });
+  };
+
   return (
     <>
       <Form>
@@ -43,6 +62,7 @@ export function FormWeb({
           <Button onClick={increasePag}>+</Button>
           <input name="numPages" type="number" value={numPages} />
           <Button onClick={decreasePag}>-</Button>
+          <ButtonInfo onClick={ExtraInfoPages}>i</ButtonInfo>
         </div>
 
         <br />
@@ -55,8 +75,10 @@ export function FormWeb({
             type="number"
             min="0"
             value={numLanguages}
+            readOnly
           />
           <Button onClick={decreaseLanguages}>-</Button>
+          <ButtonInfo onClick={ExtraInfoLanguages}>i</ButtonInfo>
         </div>
       </Form>
     </>

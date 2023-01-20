@@ -10,18 +10,18 @@ function Welcome() {
       <p>
         A continuació trobaràs una aplicació per calcular el pressupost de
         diferents serveis.
-      
         <br />
-        Pots triar entre les diferents opcions i el <b>preu s'actualitzarà
-        automaticament</b> al afegir o treure serveis.
-       
+        Pots triar entre les diferents opcions i el{" "}
+        <b>preu s'actualitzarà automaticament</b> al afegir o treure serveis.
         <br />
-        Podràs <b>guardar els pressupostos</b> que hagis creat i <b>visualitzar-los</b> a la
-        part dreta de la pantalla. <br/> On també tindràs diferents <b>opcions de
-        filtrat</b>.
+        Podràs <b>guardar els pressupostos</b> que hagis creat i{" "}
+        <b>visualitzar-los</b> a la part dreta de la pantalla. <br /> On també
+        tindràs diferents <b>opcions de filtrat</b>.
       </p>
-      <p><b>Crea el teu pressupost</b></p>
-      
+      <p>
+        <b>Crea el teu pressupost</b>
+      </p>
+
       <ul>
         <ButtonStart>
           <Link to="/Budget">Crea el teu pressupost</Link>

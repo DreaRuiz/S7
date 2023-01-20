@@ -14,6 +14,13 @@
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
 }
+.coustomPopup{
+  border: 2px solid;
+  border-radius: 15px;
+  height: auto;
+  width: 800px;
+  align-items: center;
+};
 
 a {
   font-weight: 500;
@@ -30,7 +37,6 @@ body {
   margin-left: 50px;
   min-width: 320px;
   min-height: 100vh;
-/*   align-items: center; */
   justify-content: center;
   display: flex;
 
@@ -47,6 +53,7 @@ h2 {
 h3 {
   color: #86C8BC 
 }
+
 
 button {
   border-radius: 8px;
@@ -67,6 +74,8 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
@@ -79,3 +88,5 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+
