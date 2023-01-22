@@ -658,3 +658,103 @@ function Welcome() {
   );
 }
 ```
+# EXERCICI 6
+
+### Styled
+Creo el component ButtonInfo i li dono estil
+```jsx
+export const ButtonInfo = styled.button`
+  font-size: 10px;
+  font-weight: bold;
+  color: white;
+  border-radius: 50px;
+  background-color: #00337c;
+  margin: 8px;
+`;
+```
+
+### FormWeb
+Faig servir el plugin Swall que crea popups. Aquí es pot trobar el Swall https://sweetalert2.github.io/
+```jsx
+import Swal from "sweetalert2"; // Importo Swal
+
+// POPUP
+// Creo una funció perquè mostri el popup amb la info de les pàgines i pels idiomes (amb Swal) i customitzo el Swal (com indica a la documentació de la pàgina de Swal).
+  const ExtraInfoPages = () => {
+    Swal.fire({
+      text: "Aquest component indica el número de planes que tindrà la teva pàgina web",
+      showConfirmButton: false, // Per treure-li el botó
+      showCloseButton: false,
+      customClass: {
+        popup: "coustomPopup", // Per donar estils (que es modifiquen al css (index.css))
+      },
+    });
+  };
+
+  const ExtraInfoLanguages = () => {
+    Swal.fire({
+      text: "Aquest component indica el número d'idiomes que tindrà la teva pàgina web",
+      showConfirmButton: false,
+      showCloseButton: false,
+      customClass: {
+        popup: "coustomPopup",
+      },
+    });
+  };
+
+  return (
+    <>
+      <Form>
+        <div>
+          Número de pàgines:
+          <Button onClick={increasePag}>+</Button>
+          <input name="numPages" type="number" value={numPages} />
+          <Button onClick={decreasePag}>-</Button>
+          <ButtonInfo onClick={ExtraInfoPages}>i</ButtonInfo> // Creo el botó i apunto a la funció perquè mostri el popup
+        </div>
+
+        <br />
+
+        <div>
+          Número d'idiomes:
+          <Button onClick={increaseLanguages}>+</Button>
+          <input
+            name="numLanguages"
+            type="number"
+            min="0"
+            value={numLanguages}
+            readOnly
+          />
+          <Button onClick={decreaseLanguages}>-</Button>
+          <ButtonInfo onClick={ExtraInfoLanguages}>i</ButtonInfo>
+        </div>
+      </Form>
+    </>
+  );
+}
+```
+
+### index.css
+Per customitzar el component Popup
+```css
+.coustomPopup{
+  border: 2px solid;
+  border-radius: 15px;
+  height: auto;
+  width: 800px;
+  align-items: center;
+};
+```
+
+# EXERCICI 7
+### Budget
+```jsx
+
+```
+
+
+
+
+
+
+AJAX request example

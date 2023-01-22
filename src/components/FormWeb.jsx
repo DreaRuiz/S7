@@ -49,10 +49,12 @@ export function FormWeb({
       showConfirmButton: false,
       showCloseButton: false,
       customClass: {
-        popup: "coustomContainerPopup",
+        popup: "coustomPopup",
       },
     });
   };
+
+
 
   return (
     <>

@@ -3,6 +3,8 @@ import { data } from "../assets/data";
 import { Checkbox } from "../components/Checkbox";
 import { FormWeb } from "../components/FormWeb";
 import { manageLocalStorage } from "../useLocalStorage";
+import { ButtonStart } from "../style/styled";
+import Swal from "sweetalert2";
 
 const getFormattedPrice = (price) => `${price}€ `;
 
@@ -12,6 +14,7 @@ export default function Budget() {
   const [checkboxPrice, setCheckboxPrice] = useState(0);
   const [numPages, setNumPages] = useState(0);
   const [numLanguages, setNumLanguages] = useState(0);
+  /*   const [currentName, setCurrenName] = useState('') */
 
   // ESTAT DESSELECCIONAT DE TOTS ELS ELEMENTS DE L'ARRAY
   const [checkedState, setCheckedState] = useState(
@@ -68,6 +71,61 @@ export default function Budget() {
     setTotal(total);
   }
 
+  // DEMANAR EL NOM
+  function saveBudget() {
+    let currentName = "";
+    // DEMANA EL NOM
+
+    // Mostra popup
+    Swal.fire({
+      text: "Escriu el teu nom per guardar el pressupost",
+      input: "text",
+      showCancelButton: true,
+      cancelButtonText: "Cancelar",
+      confirmButtonText: "Guardar",
+      confirmButtonColor: "#86c8bc",
+
+      // Si el nom no és correcte surt el missatge d'error
+      preConfirm: (name) => {
+        return fetch(`//api.github.com/users/${name}`)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(response.statusText);
+            }
+            return response.json();
+          })
+          .catch((error) => {
+            Swal.showValidationMessage("Ha hagut un error");
+          });
+      },
+      // Si el nom és correcte apareix un altre popup per confirmar
+      allowOutsideClick: () => !Swal.isLoading(),
+    }).then((result) => {
+      currentName = result.value.login;
+      console.log("currentName", currentName);
+      if (result.isConfirmed) {
+        Swal.fire({
+          text: "El teu pressupost s'ha guardat correctament",
+          confirmButtonColor: "#86c8bc",
+          showConfirmButton: false,
+          icon: "success",
+        });
+      }
+      // Guardar la data
+      let currentDate = new Date();
+      saveBudget(currentName, currentDate);
+    });
+
+    // GUARDAR EL PRESSUPOST (AMB EL NOM)
+    function saveBudget(currentName, currentDate) {
+      localStorage.setItem("currentName", currentName);
+      localStorage.setItem("currentDate", currentDate.toLocaleDateString());
+    }
+
+    // TODO: Generar un array d'objectes i ficar a dins: NOM, TÍTOL(generant un número correlatiu) els SERVEIS, PÀGINES, IDIOMES i PREU FINAL.
+    // TODO: Fer que es mostri (convertint l'array checkedbox en els serveis de DATA)
+  }
+
   return (
     <div>
       <h1>Què vols fer?</h1>
@@ -100,6 +158,7 @@ export default function Budget() {
         <p>
           <b>Preu total: {getFormattedPrice(total)}</b>
         </p>
+        <ButtonStart onClick={saveBudget}>Guardar pressupost</ButtonStart>
       </div>
     </div>
   );

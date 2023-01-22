@@ -18,9 +18,7 @@ function Welcome() {
         <b>visualitzar-los</b> a la part dreta de la pantalla. <br /> On també
         tindràs diferents <b>opcions de filtrat</b>.
       </p>
-      <p>
-        <b>Crea el teu pressupost</b>
-      </p>
+  
 
       <ul>
         <ButtonStart>
