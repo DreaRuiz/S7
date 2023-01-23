@@ -5,6 +5,7 @@ import { FormWeb } from "../components/FormWeb";
 import { manageLocalStorage } from "../useLocalStorage";
 import { ButtonStart } from "../style/styled";
 import Swal from "sweetalert2";
+import { UserBudget } from "../userBudget";
 
 const getFormattedPrice = (price) => `${price}€ `;
 
@@ -14,7 +15,7 @@ export default function Budget() {
   const [checkboxPrice, setCheckboxPrice] = useState(0);
   const [numPages, setNumPages] = useState(0);
   const [numLanguages, setNumLanguages] = useState(0);
-  /*   const [currentName, setCurrenName] = useState('') */
+  const [budgetList, setBudgetList] = useState([]); // Creo l'estat de budgetList
 
   // ESTAT DESSELECCIONAT DE TOTS ELS ELEMENTS DE L'ARRAY
   const [checkedState, setCheckedState] = useState(
@@ -27,6 +28,7 @@ export default function Budget() {
   manageLocalStorage("numPages", numPages, setNumPages);
   manageLocalStorage("numLanguages", numLanguages, setNumLanguages);
   manageLocalStorage("checkedState", checkedState, setCheckedState);
+  manageLocalStorage("budgetList", budgetList, setBudgetList); // Guarda l'estat de BudgetList després d'haver guardat el pressupost.
 
   // EFFECTS
   useEffect(() => {
@@ -72,12 +74,14 @@ export default function Budget() {
   }
 
   // DEMANAR EL NOM
-  function saveBudget() {
+  function showPopup() {
+    // Creo la funció de mostrar popup
     let currentName = "";
     // DEMANA EL NOM
 
     // Mostra popup
     Swal.fire({
+      // Amb un plugin mostra el popup
       text: "Escriu el teu nom per guardar el pressupost",
       input: "text",
       showCancelButton: true,
@@ -86,8 +90,9 @@ export default function Budget() {
       confirmButtonColor: "#86c8bc",
 
       // Si el nom no és correcte surt el missatge d'error
-      preConfirm: (name) => {
-        return fetch(`//api.github.com/users/${name}`)
+      preConfirm: (client) => {
+        // Valida i recull en nom del client
+        return fetch(`//api.github.com/users/${client}`)
           .then((response) => {
             if (!response.ok) {
               throw new Error(response.statusText);
@@ -95,16 +100,19 @@ export default function Budget() {
             return response.json();
           })
           .catch((error) => {
-            Swal.showValidationMessage("Ha hagut un error");
+            // Mostra l'error si hi ha un error al nom
+            Swal.showValidationMessage("Hi ha hagut un error");
           });
       },
       // Si el nom és correcte apareix un altre popup per confirmar
       allowOutsideClick: () => !Swal.isLoading(),
     }).then((result) => {
+      // Guarda el nom si és correcte
       currentName = result.value.login;
-      console.log("currentName", currentName);
+
       if (result.isConfirmed) {
         Swal.fire({
+          // Mostra la pantalla de s'ha guardat correctament
           text: "El teu pressupost s'ha guardat correctament",
           confirmButtonColor: "#86c8bc",
           showConfirmButton: false,
@@ -112,17 +120,31 @@ export default function Budget() {
         });
       }
       // Guardar la data
-      let currentDate = new Date();
-      saveBudget(currentName, currentDate);
+      let currentDate = new Date(); // Crea una data actual
+      saveBudget(currentName, currentDate); // ????
+      console.log(budgetList);
     });
 
     // GUARDAR EL PRESSUPOST (AMB EL NOM)
     function saveBudget(currentName, currentDate) {
-      localStorage.setItem("currentName", currentName);
-      localStorage.setItem("currentDate", currentDate.toLocaleDateString());
+      const userBudget = new UserBudget( // Crida a la classe USERBUDGET passant-li el valor dels constructors (que van per ordre segons ho hagi posat a userBudget.js)
+        currentName,
+        currentDate,
+        checkedState,
+        numPages,
+        numLanguages,
+        total
+      );
+      localStorage.setItem("currentName", currentName); // Guarda el nom al LocalStorage
+      localStorage.setItem("currentDate", currentDate.toLocaleDateString()); // Guarda la data al LocalStorage
+
+      const newBudgetList = [...budgetList]; // Fa una còpia de l'array budgetList
+      newBudgetList.push(userBudget); // Afegeix el userBudget (creat a la funció amb els constructors) a l'array newBudgetList
+      setBudgetList(newBudgetList); // Canvia l'estat de BudgetList per aquest nou, per tant té la info anterior amb el nou budget guardat també.
     }
 
-    // TODO: Generar un array d'objectes i ficar a dins: NOM, TÍTOL(generant un número correlatiu) els SERVEIS, PÀGINES, IDIOMES i PREU FINAL.
+    // TODO: Afegir un TÍTOL
+    // TODO: Fer que es netegi el formulari quan hagis guardat el pressupost (funció resetBudget i cridar-la al donar-li al botó de guardar pressupost)
     // TODO: Fer que es mostri (convertint l'array checkedbox en els serveis de DATA)
   }
 
@@ -158,7 +180,7 @@ export default function Budget() {
         <p>
           <b>Preu total: {getFormattedPrice(total)}</b>
         </p>
-        <ButtonStart onClick={saveBudget}>Guardar pressupost</ButtonStart>
+        <ButtonStart onClick={showPopup}>Guardar pressupost</ButtonStart>
       </div>
     </div>
   );

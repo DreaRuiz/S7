@@ -4,10 +4,10 @@ export const data = [
     option: "Una pàgina web",
     price: 500,
     extra: 30,
-    info: [
+    /* info: [
       "Aquest component indica el número de planes que tindrà la teva pàgina web",
       "Aquest component indica el número d'idiomes que tindrà la teva pàgina web",
-    ],
+    ], */
   },
   {
     id: 2,
@@ -20,5 +20,5 @@ export const data = [
     option: "Una campanya de Google Ads",
     price: 200,
     extra: 30,
-  }
+  },
 ];

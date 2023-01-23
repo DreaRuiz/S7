@@ -22,7 +22,7 @@ function Welcome() {
 
       <ul>
         <ButtonStart>
-          <Link to="/Budget">Crea el teu pressupost</Link>
+          <Link className="Link" to="/Budget">Crea el teu pressupost</Link>
         </ButtonStart>
       </ul>
     </main>

@@ -74,6 +74,10 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+.Link{
+  text-decoration: none;
+  color: #b1b2ff
+}
 
 
 @media (prefers-color-scheme: light) {
