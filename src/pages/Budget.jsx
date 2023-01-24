@@ -6,6 +6,7 @@ import { manageLocalStorage } from "../useLocalStorage";
 import { ButtonStart } from "../style/styled";
 import Swal from "sweetalert2";
 import { UserBudget } from "../userBudget";
+import { ClientBudget } from "../components/clientBudget";
 
 const getFormattedPrice = (price) => `${price}€ `;
 
@@ -15,7 +16,8 @@ export default function Budget() {
   const [checkboxPrice, setCheckboxPrice] = useState(0);
   const [numPages, setNumPages] = useState(0);
   const [numLanguages, setNumLanguages] = useState(0);
-  const [budgetList, setBudgetList] = useState([]); // Creo l'estat de budgetList
+  const [budgetList, setBudgetList] = useState([]);
+  const [services, setServices] = useState([]);
 
   // ESTAT DESSELECCIONAT DE TOTS ELS ELEMENTS DE L'ARRAY
   const [checkedState, setCheckedState] = useState(
@@ -28,7 +30,8 @@ export default function Budget() {
   manageLocalStorage("numPages", numPages, setNumPages);
   manageLocalStorage("numLanguages", numLanguages, setNumLanguages);
   manageLocalStorage("checkedState", checkedState, setCheckedState);
-  manageLocalStorage("budgetList", budgetList, setBudgetList); // Guarda l'estat de BudgetList després d'haver guardat el pressupost.
+  manageLocalStorage("budgetList", budgetList, setBudgetList);
+  manageLocalStorage("services", services, setServices);
 
   // EFFECTS
   useEffect(() => {
@@ -73,83 +76,89 @@ export default function Budget() {
     setTotal(total);
   }
 
-  // DEMANAR EL NOM
-  function showPopup() {
-    // Creo la funció de mostrar popup
-    let currentName = "";
-    // DEMANA EL NOM
+  // ESBORRA EL FORMULARI
+  function restartBudget() {
+    setTotal(0),
+      setCheckboxPrice(0),
+      setCheckedState(new Array(data.length).fill(false)),
+      setNumPages(0);
+    setNumLanguages(0);
+  }
 
-    // Mostra popup
+  // DEMANA EL NOM I EL TÍTOL
+  function showPopup() {
     Swal.fire({
-      // Amb un plugin mostra el popup
-      text: "Escriu el teu nom per guardar el pressupost",
-      input: "text",
+      // DEMANAR NOM I TÍTOL
+      html:
+        "Introdueix les dades per guardar el presupost" +
+        '<input id="swal-client" class="swal2-input" placeholder="Escriu el teu nom">' +
+        '<input id="swal-title" class="swal2-input" placeholder="Títol del pressupost">',
       showCancelButton: true,
       cancelButtonText: "Cancelar",
       confirmButtonText: "Guardar",
       confirmButtonColor: "#86c8bc",
-
-      // Si el nom no és correcte surt el missatge d'error
-      preConfirm: (client) => {
-        // Valida i recull en nom del client
-        return fetch(`//api.github.com/users/${client}`)
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error(response.statusText);
-            }
-            return response.json();
-          })
-          .catch((error) => {
-            // Mostra l'error si hi ha un error al nom
-            Swal.showValidationMessage("Hi ha hagut un error");
-          });
+      preConfirm: () => {
+        return [
+          document.getElementById("swal-client").value,
+          document.getElementById("swal-title").value,
+        ];
       },
-      // Si el nom és correcte apareix un altre popup per confirmar
+
+      // GUARDAR NOM I TÍTOL
       allowOutsideClick: () => !Swal.isLoading(),
     }).then((result) => {
-      // Guarda el nom si és correcte
-      currentName = result.value.login;
+      const currentTitle = result.value[1];
+      const currentName = result.value[0];
 
       if (result.isConfirmed) {
+        // MOSTRAR POPUP DE S'HA GUARDAT BÉ
         Swal.fire({
-          // Mostra la pantalla de s'ha guardat correctament
           text: "El teu pressupost s'ha guardat correctament",
           confirmButtonColor: "#86c8bc",
           showConfirmButton: false,
           icon: "success",
         });
       }
-      // Guardar la data
-      let currentDate = new Date(); // Crea una data actual
-      saveBudget(currentName, currentDate); // ????
-      console.log(budgetList);
+      // GUARDA LA DATA ACTUAL
+      const today = new Date();
+      const currentDate = today.toDateString("es-ES");
+
+      // PASSA LA INFO OBTINGUDA A LA FUNCIÓ SAVEBUDGET
+      saveBudget(currentTitle, currentName, currentDate);
     });
+  }
+  // GUARDAR EL PRESSUPOST (AMB EL NOM, TÍTOL I DATA)
+  function saveBudget(currentTitle, currentName, currentDate) {
+    const userBudget = new UserBudget(
+      currentTitle,
+      currentName,
+      currentDate,
+      services,
+      numPages,
+      numLanguages,
+      total
+    );
+    localStorage.setItem("currentTitle", currentTitle);
+    localStorage.setItem("currentName", currentName);
+    localStorage.setItem("currentDate", currentDate);
 
-    // GUARDAR EL PRESSUPOST (AMB EL NOM)
-    function saveBudget(currentName, currentDate) {
-      const userBudget = new UserBudget( // Crida a la classe USERBUDGET passant-li el valor dels constructors (que van per ordre segons ho hagi posat a userBudget.js)
-        currentName,
-        currentDate,
-        checkedState,
-        numPages,
-        numLanguages,
-        total
-      );
-      localStorage.setItem("currentName", currentName); // Guarda el nom al LocalStorage
-      localStorage.setItem("currentDate", currentDate.toLocaleDateString()); // Guarda la data al LocalStorage
-
-      const newBudgetList = [...budgetList]; // Fa una còpia de l'array budgetList
-      newBudgetList.push(userBudget); // Afegeix el userBudget (creat a la funció amb els constructors) a l'array newBudgetList
-      setBudgetList(newBudgetList); // Canvia l'estat de BudgetList per aquest nou, per tant té la info anterior amb el nou budget guardat també.
-    }
-
-    // TODO: Afegir un TÍTOL
-    // TODO: Fer que es netegi el formulari quan hagis guardat el pressupost (funció resetBudget i cridar-la al donar-li al botó de guardar pressupost)
-    // TODO: Fer que es mostri (convertint l'array checkedbox en els serveis de DATA)
+    const newBudgetList = [...budgetList];
+    newBudgetList.push(userBudget);
+    setBudgetList(newBudgetList);
+    restartBudget();
   }
 
+  const servicesName = [];
+  // CONVERTEIX L'ARRAY DE CHECKEDSTATE EN STRINGS (treient la info de DATA)
+  useEffect(() => {
+    checkedState.map((item, index) => {
+      if (item === true) servicesName.push(data[index].option);
+    });
+    setServices(servicesName);
+  }, [checkedState]);
+
   return (
-    <div>
+    <main>
       <h1>Què vols fer?</h1>
       <div>
         {data.map(({ option, price }, index) => {
@@ -164,16 +173,16 @@ export default function Budget() {
                 onCheck={onCheckboxSelected}
                 getFormattedPrice={getFormattedPrice}
               />
-              {checkedState[0] &&
-                index === 0 && ( // MOSTRA EL FORMULARI AL MARCAR LA PRIMERA CHECKBOX
-                  <FormWeb
-                    numPages={numPages}
-                    numLanguages={numLanguages}
-                    setNumPages={setNumPages}
-                    setNumLanguages={setNumLanguages}
-                    key={index}
-                  />
-                )}
+              {checkedState[0] && index === 0 && (
+                // MOSTRA EL FORMULARI AL MARCAR LA PRIMERA CHECKBOX
+                <FormWeb
+                  numPages={numPages}
+                  numLanguages={numLanguages}
+                  setNumPages={setNumPages}
+                  setNumLanguages={setNumLanguages}
+                  key={index}
+                />
+              )}
             </>
           );
         })}
@@ -182,6 +191,40 @@ export default function Budget() {
         </p>
         <ButtonStart onClick={showPopup}>Guardar pressupost</ButtonStart>
       </div>
-    </div>
+
+      <div>
+        {/* MOSTRAR PRESSUPOSTOS */}
+        {budgetList !== [] &&
+          budgetList.map(
+            (
+              {
+                currentTitle,
+                currentName,
+                currentDate,
+                services,
+                numPages,
+                numLanguages,
+                total,
+              },
+              index
+            ) => {
+              return (
+                <>
+                  <ClientBudget
+                    key={index}
+                    currentTitle={currentTitle}
+                    currentName={currentName}
+                    currentDate={currentDate}
+                    services={services}
+                    numPages={numPages}
+                    numLanguages={numLanguages}
+                    total={total}
+                  />
+                </>
+              );
+            }
+          )}
+      </div>
+    </main>
   );
 }

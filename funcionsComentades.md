@@ -749,12 +749,310 @@ Per customitzar el component Popup
 # EXERCICI 7
 ### Budget
 ```jsx
+import { useEffect, useState } from "react";
+import { data } from "../assets/data";
+import { Checkbox } from "../components/Checkbox";
+import { FormWeb } from "../components/FormWeb";
+import { manageLocalStorage } from "../useLocalStorage";
+import { ButtonStart } from "../style/styled";
+import Swal from "sweetalert2";
+import { UserBudget } from "../userBudget";
+import { ClientBudget } from "../components/clientBudget";
+
+const getFormattedPrice = (price) => `${price}€ `;
+
+export default function Budget() {
+  // ESTATS
+  const [total, setTotal] = useState(0);
+  const [checkboxPrice, setCheckboxPrice] = useState(0);
+  const [numPages, setNumPages] = useState(0);
+  const [numLanguages, setNumLanguages] = useState(0);
+  const [budgetList, setBudgetList] = useState([]); // Creo l'estat de budgetList
+  const [services, setServices] = useState([]);
+
+  // ESTAT DESSELECCIONAT DE TOTS ELS ELEMENTS DE L'ARRAY
+  const [checkedState, setCheckedState] = useState(
+    new Array(data.length).fill(false)
+  );
+
+  // RECUPERAR L'ESTAT (LOCALSTORAGE)
+  manageLocalStorage("total", total, setTotal);
+  manageLocalStorage("checkboxPrice", checkboxPrice, setCheckboxPrice);
+  manageLocalStorage("numPages", numPages, setNumPages);
+  manageLocalStorage("numLanguages", numLanguages, setNumLanguages);
+  manageLocalStorage("checkedState", checkedState, setCheckedState);
+  manageLocalStorage("budgetList", budgetList, setBudgetList); // Guarda l'estat de BudgetList després d'haver guardat el pressupost.
+  manageLocalStorage("services", services, setServices);
+  
+  // EFFECTS
+  useEffect(() => {
+    calculateTotalPrice();
+  }, [checkedState, numLanguages, numPages]);
+
+  // SELECCIONA I DESSELECCIONA CHECKBOX
+  function onCheckboxSelected(i) {
+    let nextCheckedState = [...checkedState];
+    nextCheckedState[i] = !nextCheckedState[i];
+
+    // CANVIA L'ESTAT DE LES PÀGINES I ELS IDIOMES (A 0 quan està desmarcat i a 1 quan està marcat el checkbox)
+    if (nextCheckedState[0] === true) {
+      setNumLanguages(1);
+      setNumPages(1);
+    }
+
+    if (nextCheckedState[0] === false) {
+      setNumLanguages(0);
+      setNumPages(0);
+    }
+    // CANVIA L'ESTAT DE LA CHECKBOX
+    setCheckedState(nextCheckedState);
+
+    // SUMA EL PREU DELS PRODUCTES SELECCIONATS
+    const sumPrice = nextCheckedState.reduce((acc, currentValue, index) => {
+      if (currentValue === true) {
+        return acc + data[index].price;
+      }
+      return acc;
+    }, 0);
+
+    // CANVIA L'ESTAT DE CHECKBOXPRICE
+    setCheckboxPrice(sumPrice);
+  }
+
+  // CALCULA EL PREU DE LA WEB AMB DIF. PÀGINES I DIF. IDIOMES
+  // CALCULA EL PREU TOTAL (PÀGINES + CHECKBOX) I CANVIA L'ESTAT
+  function calculateTotalPrice() {
+    const totalWeb = numPages * numLanguages * 30;
+    const total = totalWeb + checkboxPrice;
+    setTotal(total);
+  }
+
+  function restartBudget() {
+    setTotal(0),
+      setCheckboxPrice(0),
+      setCheckedState(new Array(data.length).fill(false)),
+      setNumPages(0);
+    setNumLanguages(0);
+  }
+
+  // DEMANAR EL NOM
+  function showPopup() {
+    // Creo la funció de mostrar popup
+
+    // Mostra popup
+    Swal.fire({
+      // Amb un plugin mostra el popup
+      html:
+        "Introdueix les dades per guardar el presupost" +
+        '<input id="swal-client" class="swal2-input" placeholder="Escriu el teu nom">' +
+        '<input id="swal-title" class="swal2-input" placeholder="Títol del pressupost">',
+      showCancelButton: true,
+      cancelButtonText: "Cancelar",
+      confirmButtonText: "Guardar",
+      confirmButtonColor: "#86c8bc",
+      preConfirm: () => {
+        return [
+          document.getElementById("swal-client").value, // Retorno el valor que han escrit a l'input
+          document.getElementById("swal-title").value,
+        ];
+      },
+
+      // Apareix un altre popup per confirmar que s'ha guardat el pressupost
+      allowOutsideClick: () => !Swal.isLoading(),
+    }).then((result) => {
+      const currentTitle = result.value[1]; // Guardo el valor del nom (que han escrit a l'input)
+      const currentName = result.value[0];
+
+      if (result.isConfirmed) {
+        Swal.fire({
+          // Mostra la pantalla de s'ha guardat correctament
+
+          text: "El teu pressupost s'ha guardat correctament",
+          confirmButtonColor: "#86c8bc",
+          showConfirmButton: false,
+          icon: "success",
+        });
+      }
+      // Guardar la data actual i li dona format
+      const today = new Date();
+      const currentDate = today.toDateString("es-ES");
+
+      // Li passa a la funció saveBudget el tíol, el nom i la data
+      saveBudget(currentTitle, currentName, currentDate);
+    });
+  }
+  // GUARDAR EL PRESSUPOST (AMB EL NOM, TÍTOL I DATA)
+  function saveBudget(currentTitle, currentName, currentDate) {
+    const userBudget = new UserBudget( // Crida a la classe USERBUDGET passant-li el valor dels constructors (que van per ordre segons ho hagi posat a userBudget.js) creant aixi el new UserBudget
+      currentTitle,
+      currentName,
+      currentDate,
+      services,
+      numPages,
+      numLanguages,
+      total
+    );
+    localStorage.setItem("currentTitle", currentTitle); // Guarda el títol al LocalStorage
+    localStorage.setItem("currentName", currentName); // Guarda el nom al LocalStorage
+    localStorage.setItem("currentDate", currentDate); // Guarda la data al LocalStorage
+
+    const newBudgetList = [...budgetList]; // Fa una còpia de l'array budgetList
+    newBudgetList.push(userBudget); // Afegeix el userBudget (creat a la funció amb els constructors) a l'array newBudgetList
+
+    setBudgetList(newBudgetList); // Canvia l'estat de BudgetList per aquest nou, per tant té la info anterior amb el nou budget guardat també
+    restartBudget(); // Quan s'hagi guardat crida a la funcio restartBudget que neteja el formulari i les checkbox
+  }
+
+  const servicesName = []; // Crea l'array buit (fora de la funció)
+  // CONVERTIR L'ARRAY DE CHECKEDSTATE EN STRINGS (treient la info de DATA)
+  useEffect(() => {
+    checkedState.map((item, index) => {
+      if (item === true) servicesName.push(data[index].option); // Si l'item (de l'array checkedState) és tue, agfa la OPTION del DATA corresponant a l`índex d'el true que acaba de verificar i guarda-la a SERVICESNAME
+    });
+    setServices(servicesName); // Modifica l'estat de SERVICES pel contingut de servicesName
+  }, [checkedState]); // Tot això s'ha de fer quan canvii algun checkedState.
+
+  return (
+    <main>
+      <h1>Què vols fer?</h1>
+      <div>
+        {data.map(({ option, price }, index) => {
+          return (
+            <>
+              <Checkbox
+                index={index}
+                text={option}
+                price={price}
+                key={index}
+                checked={checkedState[index]}
+                onCheck={onCheckboxSelected}
+                getFormattedPrice={getFormattedPrice}
+              />
+              {checkedState[0] &&
+                index === 0 && ( // MOSTRA EL FORMULARI AL MARCAR LA PRIMERA CHECKBOX
+                  <FormWeb
+                    numPages={numPages}
+                    numLanguages={numLanguages}
+                    setNumPages={setNumPages}
+                    setNumLanguages={setNumLanguages}
+                    key={index}
+                  />
+                )}
+            </>
+          );
+        })}
+        <p>
+          <b>Preu total: {getFormattedPrice(total)}</b>
+        </p>
+        <ButtonStart onClick={showPopup}>Guardar pressupost</ButtonStart>
+      </div>
+
+      {/* // MOSTRAR PRESSUPOSTOS */}
+      <div>
+        {budgetList !== [] && // Si l'array budgetList NO està buit: fa un map de l'array agafant tots els valors següents
+          budgetList.map(
+            (
+              {
+                currentTitle,
+                currentName,
+                currentDate,
+                services,
+                numPages,
+                numLanguages,
+                total,
+              },
+              index
+            ) => {
+              return (
+                <>
+                  <ClientBudget // Crida al component ClientBudget i li envia la info amb la que ha d'emplenar el component i retornar-ho (fent el map)
+                    key={index}
+                    currentTitle={currentTitle}
+                    currentName={currentName}
+                    currentDate={currentDate}
+                    services={services}
+                    numPages={numPages}
+                    numLanguages={numLanguages}
+                    total={total}
+                  />
+                </>
+              );
+            }
+          )}
+      </div>
+    </main>
+  );
+}
 
 ```
 
+### ClientBudget
+```jsx
+import React from "react";
+import { Budget } from "../style/styled";
 
+export function ClientBudget({ // Creo el component ClientBudget amb totes les dades d'un pressupost (li venen per props)
+  currentTitle,
+  currentName,
+  currentDate,
+  services,
+  numPages,
+  numLanguages,
+  total,
+}) {
+    const formattedDate = String(currentDate.toLocaleDateString("es-ES")); // Dono format a la data 
 
+  return (
+    <div>
+      <Budget> {/* // Faig servir el component creat a styled */}
+        <label> {/* {// Creo la "plantilla de com s'ha de veure i omplir (automaticament) un pressupost"} */}
+          <h2>Títol: {currentTitle}</h2>
+          <p>Nom: {currentName}</p>
+          <p>Data: {formattedDate}</p>
+          <p>Serveis: {services} </p>
+          <p>
+            Pàgines: {numPages}
+            <br />
+            Idiomes: {numLanguages}
+          </p>
+          <p>Preu final: {total} €</p>
+        </label>
+      </Budget>
+    </div>
+  );
+}
+```
+### userBudget
+```js
+export class UserBudget {
+  // Crea la classe (la fàbrica)
+  // Defineix quins "atributs" ha de tenir l'objecte que es crei a la fàbirica/classe. Defineix la plantilla. (Ha de tenir un títol, un client...)
+  currentTitle;
+  currentName;
+  currentDate;
+  services;
+  numPages;
+  numLanguages;
+  total;
 
+  constructor(
+    currentTitle,
+    currentName,
+    currentDate,
+    services,
+    numPages,
+    numLanguages,
+    total
+  ) {
+    // Dic quins valors ha de "demanar" per poder construir l'objecte
+    this.currentTitle = currentTitle;
+    this.currentName = currentName; // this fa referència a l'objecte concret que s'està creant en aquell moment. El CLIENT "d'aquest" OBJECTE ha de ser igual al CLIENT que t'han passat al cridar la funció.
+    this.currentDate = currentDate;
+    this.services = services;
+    this.numPages = numPages;
+    this.numLanguages = numLanguages;
+    this.total = total;
+  }
+}
 
-
-AJAX request example
+```
