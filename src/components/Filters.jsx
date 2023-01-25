@@ -1,15 +1,22 @@
 import React from "react";
-import { Button, Budget } from "../style/styled";
+import { Button } from "../style/styled";
 
 // FILTRAR ELS PRESSUPOSTOS
-export const Filters = ({ budgetList }) => {
-  // Per ordre alfabètic
+export const Filters = ({ setBudgetList, budgetList }) => {
+  const changeBudget = (change) => {
+    setBudgetList(change);
+  };
+
   const orderAlphabetically = () => {
-    const alphabeticallyBudgetList = budgetList
-      .map((item) => item.currentTitle)
-      .sort();
-    console.log(alphabeticallyBudgetList);
-    return alphabeticallyBudgetList;
+    const orderByTitle = budgetList
+      .map((e) => e)
+      .sort((a, b) => {
+        a.currentTitle - b.currentTitle;
+        if (a.currentTitle > b.currentTitle) return 1;
+        else return -1;
+      });
+
+    changeBudget(orderByTitle);
   };
 
   // Per ordre alfabètic
@@ -22,8 +29,9 @@ export const Filters = ({ budgetList }) => {
         else return -1;
       });
 
-    console.log(orderByDate);
+    changeBudget(orderByDate);
   };
+
   // Restaurar l'ordre
   const reorder = () => {
     const restartOrder = budgetList
@@ -33,7 +41,7 @@ export const Filters = ({ budgetList }) => {
         if (a.currentDate > b.currentDate) return 1;
         else return -1;
       });
-    console.log(restartOrder);
+    changeBudget(restartOrder);
   };
 
   return (

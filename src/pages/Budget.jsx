@@ -39,6 +39,8 @@ export default function Budget() {
     calculateTotalPrice();
   }, [checkedState, numLanguages, numPages]);
 
+
+  
   // SELECCIONA I DESSELECCIONA CHECKBOX
   function onCheckboxSelected(i) {
     let nextCheckedState = [...checkedState];
@@ -197,7 +199,10 @@ export default function Budget() {
       </div>
 
       {/* // FILTRAR ELS PRESSUPOSTOS */}
-      <Filters key={"buttonsFilter"} budgetList={budgetList}></Filters>
+      <Filters 
+        key={"buttonsFilter"} 
+        budgetList={budgetList} 
+        setBudgetList={setBudgetList}/>
 
       {/* MOSTRAR PRESSUPOSTOS */}
       <div>
