@@ -1,33 +1,32 @@
 import React from "react";
-/* import { Budget } from "../style/styled"; */
+import { Budget } from "../style/styled";
 
-export function ClientBudget({ // Creo el component ClientBudget amb totes les dades d'un pressupost (li venen per props)
+export function ClientBudget({
+  // Creo el component ClientBudget amb totes les dades d'un pressupost (li venen per props)
   currentTitle,
   currentName,
-  currentDate,
   services,
   numPages,
   numLanguages,
   total,
 }) {
-  
-    const formattedDate = String(currentDate.toLocaleDateString("es-ES")); 
-
   return (
     <div>
       <div>
-        <label>
+        <Budget>
           <h2>Títol: {currentTitle}</h2>
-          <p>Nom: {currentName}</p>
-          <p>Data: {"data"}</p>
-          <p>Serveis: {services} </p>
           <p>
+            Nom: {currentName}
+            <br />
+            Serveis: {services}
+            <br />
             Pàgines: {numPages}
             <br />
             Idiomes: {numLanguages}
+            <br />
+            Preu final: {total} €
           </p>
-          <p>Preu final: {total} €</p>
-        </label>
+        </Budget>
       </div>
     </div>
   );

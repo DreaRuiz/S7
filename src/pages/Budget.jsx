@@ -7,6 +7,7 @@ import { ButtonStart } from "../style/styled";
 import Swal from "sweetalert2";
 import { UserBudget } from "../userBudget";
 import { ClientBudget } from "../components/clientBudget";
+import { Filters } from "../components/Filters";
 
 const getFormattedPrice = (price) => `${price}€ `;
 
@@ -121,7 +122,7 @@ export default function Budget() {
       }
       // GUARDA LA DATA ACTUAL
       const today = new Date();
-      const currentDate = today.toDateString("es-ES");
+      const currentDate = today;
 
       // PASSA LA INFO OBTINGUDA A LA FUNCIÓ SAVEBUDGET
       saveBudget(currentTitle, currentName, currentDate);
@@ -140,7 +141,10 @@ export default function Budget() {
     );
     localStorage.setItem("currentTitle", currentTitle);
     localStorage.setItem("currentName", currentName);
-    localStorage.setItem("currentDate", currentDate);
+    localStorage.setItem(
+      "currentDate",
+      currentDate.toLocaleDateString("es-ES")
+    );
 
     const newBudgetList = [...budgetList];
     newBudgetList.push(userBudget);
@@ -192,8 +196,11 @@ export default function Budget() {
         <ButtonStart onClick={showPopup}>Guardar pressupost</ButtonStart>
       </div>
 
+      {/* // FILTRAR ELS PRESSUPOSTOS */}
+      <Filters key={"buttonsFilter"} budgetList={budgetList}></Filters>
+
+      {/* MOSTRAR PRESSUPOSTOS */}
       <div>
-        {/* MOSTRAR PRESSUPOSTOS */}
         {budgetList !== [] &&
           budgetList.map(
             (

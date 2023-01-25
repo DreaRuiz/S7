@@ -37,8 +37,12 @@ export const ButtonStart = styled.button`
   padding: 0.25em 1em;
 `;
 
-/* export const Budget = styled.div`
-  
-`; */
-
-
+export const Budget = styled.div`
+  margin-top: 2vh;
+  margin-bottom: 2vh;
+  margin-right: 10%;
+  padding: 2vh;
+  border: 2px solid #ffd4b2;
+  border-radius: 10px;
+  width: 100%;
+`;
