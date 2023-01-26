@@ -1,8 +1,9 @@
 import React from "react";
 import { Button } from "../style/styled";
 
-// FILTRAR ELS PRESSUPOSTOS
-export const Filters = ({ setBudgetList, budgetList }) => {
+// ORDERAR ELS PRESSUPOSTOS
+export const Filters = ({ setBudgetList, budgetList, search, setSearch, filteredBudget, setFilteredBudget, copyBudgetList }) => {
+  // Canvia l'estat del budgetList pel resultat de la funció que toqui
   const changeBudget = (change) => {
     setBudgetList(change);
   };
@@ -15,7 +16,6 @@ export const Filters = ({ setBudgetList, budgetList }) => {
         if (a.currentTitle > b.currentTitle) return 1;
         else return -1;
       });
-
     changeBudget(orderByTitle);
   };
 
@@ -28,7 +28,6 @@ export const Filters = ({ setBudgetList, budgetList }) => {
         if (a.currentDate < b.currentDate) return 1;
         else return -1;
       });
-
     changeBudget(orderByDate);
   };
 
@@ -44,11 +43,38 @@ export const Filters = ({ setBudgetList, budgetList }) => {
     changeBudget(restartOrder);
   };
 
+  // Cercar per títol
+  // CERCADOR PER TÍTOL
+
+  
+  const handleChangeSearch = (e) => {
+    setSearch(e.target.value);
+  };
+
+  const filterByTitle = copyBudgetList.filter((e) => {
+    if (e.currentTitle.toUpperCase().includes(search.toUpperCase())) {
+      return true;
+    }
+    return false;
+  });
+
+  console.log("filterByTitle", filterByTitle);
+
+
   return (
-    <div>
-      <Button onClick={orderAlphabetically}>Ordre alfabètic</Button>
-      <Button onClick={orderDate}>Ordre cronològic</Button>
-      <Button onClick={reorder}>Restaurar ordre</Button>
-    </div>
+    <>
+      <div>
+        <Button onClick={orderAlphabetically}>Ordre alfabètic</Button>
+        <Button onClick={orderDate}>Ordre cronològic</Button>
+        <Button onClick={reorder}>Restaurar ordre</Button>
+      </div>
+
+      <input
+        value={search}
+        onChange={handleChangeSearch}
+        type="text"
+        placeholder="Títol del pressupost"
+      ></input>
+    </>
   );
 };

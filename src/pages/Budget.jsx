@@ -18,7 +18,10 @@ export default function Budget() {
   const [numPages, setNumPages] = useState(0);
   const [numLanguages, setNumLanguages] = useState(0);
   const [budgetList, setBudgetList] = useState([]);
+  const [filteredBudget, setFilteredBudget] = useState([])
   const [services, setServices] = useState([]);
+  const [search, setSearch] = useState("");
+
 
   // ESTAT DESSELECCIONAT DE TOTS ELS ELEMENTS DE L'ARRAY
   const [checkedState, setCheckedState] = useState(
@@ -39,8 +42,6 @@ export default function Budget() {
     calculateTotalPrice();
   }, [checkedState, numLanguages, numPages]);
 
-
-  
   // SELECCIONA I DESSELECCIONA CHECKBOX
   function onCheckboxSelected(i) {
     let nextCheckedState = [...checkedState];
@@ -163,6 +164,11 @@ export default function Budget() {
     setServices(servicesName);
   }, [checkedState]);
 
+
+// CERCADOR PER TÍTOL
+const copyBudgetList = [...budgetList]
+console.log("copyBudgetList", copyBudgetList)
+
   return (
     <main>
       <h1>Què vols fer?</h1>
@@ -202,7 +208,13 @@ export default function Budget() {
       <Filters 
         key={"buttonsFilter"} 
         budgetList={budgetList} 
-        setBudgetList={setBudgetList}/>
+        setBudgetList={setBudgetList}
+        search={search}
+        setSearch={setSearch}
+        filteredBudget={filteredBudget}
+        setFilteredBudget={setFilteredBudget}
+        copyBudgetList={copyBudgetList}
+        />
 
       {/* MOSTRAR PRESSUPOSTOS */}
       <div>

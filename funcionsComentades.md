@@ -1056,3 +1056,22 @@ export class UserBudget {
 }
 
 ```
+
+
+
+// CERCADOR PER TÍTOL
+const handleChangeSearch = (e) => {
+  setSearch(e.target.value);
+  /* setBudgetList(filteredBudget); */
+};
+
+const filterByName = filteredBudget.filter((e) => {
+  if (e.currentTitle.toUpperCase().includes(search.toUpperCase())) {
+    return true;
+  }
+  return false;
+});
+setFilteredBudget(filterByName)
+console.log("filteredBudget", filteredBudget);
+
+  
