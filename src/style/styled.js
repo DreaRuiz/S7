@@ -46,3 +46,9 @@ export const Budget = styled.div`
   border-radius: 10px;
   width: 100%;
 `;
+
+export const Input = styled.input`
+  border: 1px solid #86c8bc;
+  border-radius: 4px;
+  width: 100%;
+`;

@@ -746,7 +746,7 @@ Per customitzar el component Popup
 };
 ```
 
-# EXERCICI 7
+# EXERCICI 7 i 10
 ### Budget
 ```jsx
 import { useEffect, useState } from "react";
@@ -1056,22 +1056,364 @@ export class UserBudget {
 }
 
 ```
+# EXERCICI 8 i 9
+### Budget
+```jsx
+import { useEffect, useState } from "react";
+import { data } from "../assets/data";
+import { Checkbox } from "../components/Checkbox";
+import { FormWeb } from "../components/FormWeb";
+import { manageLocalStorage } from "../useLocalStorage";
+import { ButtonStart } from "../style/styled";
+import Swal from "sweetalert2";
+import { UserBudget } from "../userBudget";
+import { ClientBudget } from "../components/clientBudget";
+import { Filters } from "../components/Filters";
 
+const getFormattedPrice = (price) => `${price}€ `;
+
+export default function Budget() {
+  // ESTATS
+  const [total, setTotal] = useState(0);
+  const [checkboxPrice, setCheckboxPrice] = useState(0);
+  const [numPages, setNumPages] = useState(0);
+  const [numLanguages, setNumLanguages] = useState(0);
+  const [budgetList, setBudgetList] = useState([]);
+  const [filteredBudget, setFilteredBudget] = useState([]) // Faig un state de filteredBudget. Que serà l'array que es mostrarà per pantalla
+  const [services, setServices] = useState([]);
+  const [search, setSearch] = useState("");
+
+
+  // ESTAT DESSELECCIONAT DE TOTS ELS ELEMENTS DE L'ARRAY
+  const [checkedState, setCheckedState] = useState(
+    new Array(data.length).fill(false)
+  );
+
+  // RECUPERAR L'ESTAT (LOCALSTORAGE)
+  manageLocalStorage("total", total, setTotal);
+  manageLocalStorage("checkboxPrice", checkboxPrice, setCheckboxPrice);
+  manageLocalStorage("numPages", numPages, setNumPages);
+  manageLocalStorage("numLanguages", numLanguages, setNumLanguages);
+  manageLocalStorage("checkedState", checkedState, setCheckedState);
+  manageLocalStorage("budgetList", budgetList, setBudgetList);
+  manageLocalStorage("services", services, setServices);
+
+  // EFFECTS
+  useEffect(() => {
+    calculateTotalPrice();
+  }, [checkedState, numLanguages, numPages]);
+
+
+  useEffect(() => { // Omplo FilteredBudget amb el contingut de budgetList (perquè budgetList no es sobreescrigui al filtrar)
+  setFilteredBudget(budgetList)
+  }, [budgetList]) // Això ha de passar cada cop que es modifiqui budgetList (quan s'inicia i quan s'afegeix un pressupost)
+  
+
+
+  // SELECCIONA I DESSELECCIONA CHECKBOX
+  function onCheckboxSelected(i) {
+    let nextCheckedState = [...checkedState];
+    nextCheckedState[i] = !nextCheckedState[i];
+
+    // CANVIA L'ESTAT DE LES PÀGINES I ELS IDIOMES (A 0 quan està desmarcat i a 1 quan està marcat el checkbox)
+    if (nextCheckedState[0] === true) {
+      setNumLanguages(1);
+      setNumPages(1);
+    }
+
+    if (nextCheckedState[0] === false) {
+      setNumLanguages(0);
+      setNumPages(0);
+    }
+    // CANVIA L'ESTAT DE LA CHECKBOX
+    setCheckedState(nextCheckedState);
+
+    // SUMA EL PREU DELS PRODUCTES SELECCIONATS
+    const sumPrice = nextCheckedState.reduce((acc, currentValue, index) => {
+      if (currentValue === true) {
+        return acc + data[index].price;
+      }
+      return acc;
+    }, 0);
+
+    // CANVIA L'ESTAT DE CHECKBOXPRICE
+    setCheckboxPrice(sumPrice);
+  }
+
+  // CALCULA EL PREU DE LA WEB AMB DIF. PÀGINES I DIF. IDIOMES
+  // CALCULA EL PREU TOTAL (PÀGINES + CHECKBOX) I CANVIA L'ESTAT
+  function calculateTotalPrice() {
+    const totalWeb = numPages * numLanguages * 30;
+    const total = totalWeb + checkboxPrice;
+    setTotal(total);
+  }
+
+  // ESBORRA EL FORMULARI
+  function restartBudget() {
+    setTotal(0),
+      setCheckboxPrice(0),
+      setCheckedState(new Array(data.length).fill(false)),
+      setNumPages(0);
+    setNumLanguages(0);
+  }
+
+  // DEMANA EL NOM I EL TÍTOL
+  function showPopup() {
+    Swal.fire({
+      // DEMANAR NOM I TÍTOL
+      html:
+        "Introdueix les dades per guardar el presupost" +
+        '<input id="swal-client" class="swal2-input" placeholder="Escriu el teu nom">' +
+        '<input id="swal-title" class="swal2-input" placeholder="Títol del pressupost">',
+      showCancelButton: true,
+      cancelButtonText: "Cancelar",
+      confirmButtonText: "Guardar",
+      confirmButtonColor: "#86c8bc",
+      preConfirm: () => {
+        return [
+          document.getElementById("swal-client").value,
+          document.getElementById("swal-title").value,
+        ];
+      },
+
+      // GUARDAR NOM I TÍTOL
+      allowOutsideClick: () => !Swal.isLoading(),
+    }).then((result) => {
+      const currentTitle = result.value[1];
+      const currentName = result.value[0];
+
+      if (result.isConfirmed) {
+        // MOSTRAR POPUP DE S'HA GUARDAT BÉ
+        Swal.fire({
+          text: "El teu pressupost s'ha guardat correctament",
+          confirmButtonColor: "#86c8bc",
+          showConfirmButton: false,
+          icon: "success",
+        });
+      }
+      // GUARDA LA DATA ACTUAL
+      const today = new Date();
+      const currentDate = today;
+
+      // PASSA LA INFO OBTINGUDA A LA FUNCIÓ SAVEBUDGET
+      saveBudget(currentTitle, currentName, currentDate);
+    });
+  }
+  // GUARDAR EL PRESSUPOST (AMB EL NOM, TÍTOL I DATA)
+  function saveBudget(currentTitle, currentName, currentDate) {
+    const userBudget = new UserBudget(
+      currentTitle,
+      currentName,
+      currentDate,
+      services,
+      numPages,
+      numLanguages,
+      total
+    );
+    localStorage.setItem("currentTitle", currentTitle);
+    localStorage.setItem("currentName", currentName);
+    localStorage.setItem(
+      "currentDate",
+      currentDate.toLocaleDateString("es-ES")
+    );
+
+    const newBudgetList = [...budgetList];
+    newBudgetList.push(userBudget);
+    setBudgetList(newBudgetList);
+    restartBudget();
+  }
+
+  const servicesName = [];
+  // CONVERTEIX L'ARRAY DE CHECKEDSTATE EN STRINGS (treient la info de DATA)
+  useEffect(() => {
+    checkedState.map((item, index) => {
+      if (item === true) servicesName.push(data[index].option);
+    });
+    setServices(servicesName);
+  }, [checkedState]);
 
 
 // CERCADOR PER TÍTOL
-const handleChangeSearch = (e) => {
-  setSearch(e.target.value);
-  /* setBudgetList(filteredBudget); */
-};
+const copyBudgetList = [...budgetList] // Clona la budgetList a una variable
 
-const filterByName = filteredBudget.filter((e) => {
-  if (e.currentTitle.toUpperCase().includes(search.toUpperCase())) {
-    return true;
-  }
-  return false;
-});
-setFilteredBudget(filterByName)
+console.log("budgetList", budgetList);
 console.log("filteredBudget", filteredBudget);
+console.log("search", search)
 
+  return (
+    <main>
+      <h1>Què vols fer?</h1>
+      <div>
+        {data.map(({ option, price }, index) => {
+          return (
+            <>
+              <Checkbox
+                index={index}
+                text={option}
+                price={price}
+                key={index}
+                checked={checkedState[index]}
+                onCheck={onCheckboxSelected}
+                getFormattedPrice={getFormattedPrice}
+              />
+              {checkedState[0] && index === 0 && (
+                // MOSTRA EL FORMULARI AL MARCAR LA PRIMERA CHECKBOX
+                <FormWeb
+                  numPages={numPages}
+                  numLanguages={numLanguages}
+                  setNumPages={setNumPages}
+                  setNumLanguages={setNumLanguages}
+                  key={index}
+                />
+              )}
+            </>
+          );
+        })}
+        <p>
+          <b>Preu total: {getFormattedPrice(total)}</b>
+        </p>
+        <ButtonStart onClick={showPopup}>Guardar pressupost</ButtonStart>
+      </div>
   
+      {/* // FILTRAR ELS PRESSUPOSTOS */}
+      <Filters // Li passo els props que necessitarà el component Filter (tant els valors com els setValue (funcions per modificar el valor))
+        key={"buttonsFilter"} 
+        budgetList={budgetList} 
+        setBudgetList={setBudgetList}
+        search={search}
+        setSearch={setSearch}
+        filteredBudget={filteredBudget}
+        setFilteredBudget={setFilteredBudget}
+        copyBudgetList={copyBudgetList}
+        />
+
+      {/* MOSTRAR PRESSUPOSTOS */}
+      <div>
+        {filteredBudget !== [] && // Li dic que faci el map de la filterBudget en comptes de la budgetList perquè mostri el que hi ha adins només (filtrat o no)
+          filteredBudget.map(
+            (
+              {
+                currentTitle,
+                currentName,
+                currentDate,
+                services,
+                numPages,
+                numLanguages,
+                total,
+              },
+              index
+            ) => {
+              return (
+                <>
+                  <ClientBudget
+                    key={index}
+                    currentTitle={currentTitle}
+                    currentName={currentName}
+                    currentDate={currentDate}
+                    services={services}
+                    numPages={numPages}
+                    numLanguages={numLanguages}
+                    total={total}
+                  />
+                </>
+              );
+            }
+          )}
+      </div>
+    </main>
+  );
+}
+```
+
+### Filters
+```jsx
+import React from "react";
+import { Button, Input } from "../style/styled";
+
+// ORDERAR ELS PRESSUPOSTOS
+export const Filters = ({
+  setBudgetList,
+  budgetList,
+  search,
+  setSearch,
+  setFilteredBudget,
+  copyBudgetList,
+}) => {
+  // Canvia l'estat del budgetList pel resultat de la funció que toqui
+  const changeBudget = (change) => {
+    setBudgetList(change);
+  };
+
+  const orderAlphabetically = () => { // Endreço alfabèticament amb un map agafant comparant els títols
+    const orderByTitle = budgetList
+      .map((e) => e)
+      .sort((a, b) => {
+        a.currentTitle - b.currentTitle;
+        if (a.currentTitle > b.currentTitle) return 1;
+        else return -1;
+      });
+    changeBudget(orderByTitle); // Crido a la funció de canvi d'estat amb el resultat objtingut del map
+  };
+
+  // Per ordre alfabètic
+  const orderDate = () => { // El mateix que abans però amb la data
+    const orderByDate = budgetList
+      .map((e) => e)
+      .sort((a, b) => {
+        a.currentDate - b.currentDate;
+        if (a.currentDate < b.currentDate) return 1;
+        else return -1;
+      });
+    changeBudget(orderByDate);
+  };
+
+  // Restaurar l'ordre
+  const reorder = () => { // El mateix que amb la data però a la inversa (perquè ja ho estava guardant posant els nous a sota)
+    const restartOrder = budgetList
+      .map((e) => e)
+      .sort((a, b) => {
+        a.currentDate - b.currentDate;
+        if (a.currentDate > b.currentDate) return 1;
+        else return -1;
+      });
+    changeBudget(restartOrder);
+  };
+
+  // Cercar per títol
+  // CERCADOR PER TÍTOL
+  const handleChangeSearch = (e) => { // Creo la funció que agafa el valor que l'user escrigui a l'input
+    setSearch(e.target.value);
+
+    const filterByTitle = copyBudgetList.filter((e) => { // Guardo a dins de filterByTitle un filter de copyBudgetList.
+      if (e.currentTitle.toUpperCase().includes(search.toUpperCase())) { // Si el títol en majúscules coincideix amb algun dels títols (passat a majúscules dels budgets) retorna true
+        return true;
+      }
+      return false;
+    });
+    setFilteredBudget(filterByTitle); // Canvio l'estat de filteredBudget pel resultat d'aquesta funció
+
+    if (search === "" || search === " ") { // Si el contingut de l'input (search) està buit o té un espai, guarda a dins de filteredBudget la llista sencera (budgetList)
+      setFilteredBudget(budgetList);
+    }
+  };
+
+  return (
+    <>
+      
+      <div>
+        <Button onClick={orderAlphabetically}>Ordre alfabètic</Button>
+        <Button onClick={orderDate}>Ordre cronològic</Button>
+        <Button onClick={reorder}>Restaurar ordre</Button>
+
+
+        <Input // Mostro l'input (creat en styled) i li passo el valor, el que ha de fer quan canvii, etc.
+          value={search}
+          onChange={handleChangeSearch}
+          type="text"
+          placeholder="Cerca un pressupost per títol"
+        ></Input>
+      </div>
+    </>
+  );
+};
+```

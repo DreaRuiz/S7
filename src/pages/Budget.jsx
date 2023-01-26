@@ -42,6 +42,13 @@ export default function Budget() {
     calculateTotalPrice();
   }, [checkedState, numLanguages, numPages]);
 
+
+  useEffect(() => {
+  setFilteredBudget(budgetList)
+  }, [budgetList])
+  
+
+
   // SELECCIONA I DESSELECCIONA CHECKBOX
   function onCheckboxSelected(i) {
     let nextCheckedState = [...checkedState];
@@ -166,8 +173,11 @@ export default function Budget() {
 
 
 // CERCADOR PER TÍTOL
-const copyBudgetList = [...budgetList]
-console.log("copyBudgetList", copyBudgetList)
+const copyBudgetList = [...budgetList] // Clona la budgetList a una variable
+
+console.log("budgetList", budgetList);
+console.log("filteredBudget", filteredBudget);
+console.log("search", search)
 
   return (
     <main>
@@ -203,7 +213,7 @@ console.log("copyBudgetList", copyBudgetList)
         </p>
         <ButtonStart onClick={showPopup}>Guardar pressupost</ButtonStart>
       </div>
-
+  
       {/* // FILTRAR ELS PRESSUPOSTOS */}
       <Filters 
         key={"buttonsFilter"} 
@@ -218,8 +228,8 @@ console.log("copyBudgetList", copyBudgetList)
 
       {/* MOSTRAR PRESSUPOSTOS */}
       <div>
-        {budgetList !== [] &&
-          budgetList.map(
+        {filteredBudget !== [] &&
+          filteredBudget.map(
             (
               {
                 currentTitle,
