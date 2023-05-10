@@ -29,7 +29,7 @@ This application allows you to find:
 
 ## How to Install
 1. Clone 
-    > `git clone https://github.com/DreaRuiz/Sprint7.git`
+    > `git clone https://github.com/DreaRuiz/budgetCreator.git`
 2. Install dependencies 
     >`npm install`    
 3. Run
